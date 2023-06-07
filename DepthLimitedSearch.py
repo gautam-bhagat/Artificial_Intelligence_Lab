@@ -1,25 +1,8 @@
 #DLS Algorithm
-graph ={
-    'a':['b','c'],
-    'b':['d','e'],
-    'c':['f','g'],
-    'd':['h','i'],
-    'e':['j','k'],
-    'f':['l','m'],
-    'g':['n','o'],
-    'h':[],
-    'i':[],
-    'j':[],
-    'k':[],
-    'l':[],
-    'm':[],
-    'n':[],
-    'o':[]
-}
+graph ={0: [(4, 1)], 1: [(3, 1), (4, 1)], 2: [(3, 1), (5, 1), (5, 1)], 3: [(1, 1), (2, 1), (4, 1)], 4: [(3, 1), (0, 1), (1, 1)], 5: [(2, 1), (2, 1)]}
 
 def DLS(start , goal , path , level , maxD):
     flag =1
-    print("\ncurrent level :",level)
     print("Goal node testing for :",start)
     path.append(start)
     if start==goal:
@@ -28,7 +11,7 @@ def DLS(start , goal , path , level , maxD):
     if level == maxD:
         return False
     print("Expanding current Node:",start)
-    for child in graph[start]:
+    for child,weigt in graph[start]:
         if DLS(child,goal,path,level+1,maxD):
             return path
         path.pop()
@@ -37,8 +20,8 @@ def DLS(start , goal , path , level , maxD):
     
     
 
-start = input("Enter a starting Node:")
-goal = input("Enter the Goal Node:")
+start = int(input("Enter a starting Node:"))
+goal = int(input("Enter the Goal Node:"))
 maxD = int(input("Enter the limit for search:"))
 print()
 path=[]

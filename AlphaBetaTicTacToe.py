@@ -1,195 +1,162 @@
-#alpha beta pruning algorithm
-from random import choice
-from math import inf
 
-board = [[0, 0, 0],
-         [0, 0, 0],
-         [0, 0, 0]]
+def GameBoard(b):
 
-def Gameboard(board):
-    chars = {1: 'X', -1: 'O', 0: ' '}
-    for x in board:
-        for y in x:
-            ch = chars[y]
-            print(f' {ch} |', end='')
-        print('\n' + '---------------')
-    print('===============')
+    board = [ b [i:i+3] for i in range(0,9,3) ]
 
-def Clearboard(board):
-    for x, row in enumerate(board):
-        for y, col in enumerate(row):
-            board[x][y] = 0
+    d ={1:"X",-1:'O',0:'_'}
+    for i in range(len(board)):
+        for j in range(len(board)):
+            print(d[board[i][j]],end=" | ")
+        print()
+    print()
 
-def winningPlayer(board, player):
-    conditions = [[board[0][0], board[0][1], board[0][2]],
-                     [board[1][0], board[1][1], board[1][2]],
-                     [board[2][0], board[2][1], board[2][2]],
-                     [board[0][0], board[1][0], board[2][0]],
-                     [board[0][1], board[1][1], board[2][1]],
-                     [board[0][2], board[1][2], board[2][2]],
-                     [board[0][0], board[1][1], board[2][2]],
-                     [board[0][2], board[1][1], board[2][0]]]
 
-    if [player, player, player] in conditions:
-        return True
 
+def getBlanks(board):
+    blanks = []
+    for i in range(len(board)):
+        if board[i] == 0 :
+            blanks.append(i)
+
+    return blanks
+
+
+def isBoardFull(board):
+    if len(getBlanks(board)) > 0:
+        return False
+    return True
+
+
+
+def isPlayerWinning(board,player):
+    win_cond = [ (0,1,2),(3,4,5),(6,7,8),
+                 (0,3,6),(1,4,5),(2,7,8),
+                 (0,4,8),(2,4,6)
+               ]
+
+    for state in win_cond:
+        if all(board[i] == player for i in state):
+            return True
+        
     return False
 
-def gameWon(board):
-    return winningPlayer(board, 1) or winningPlayer(board, -1)
 
-def printResult(board):
-    if winningPlayer(board, 1):
-        print('X has won! ' + '\n')
-
-    elif winningPlayer(board, -1):
-        print('O\'s have won! ' + '\n')
-
-    else:
-        print('Draw' + '\n')
-
-def blanks(board):
-    blank = []
-    for x, row in enumerate(board):
-        for y, col in enumerate(row):
-            if board[x][y] == 0:
-                blank.append([x, y])
-
-    return blank
-
-def boardFull(board):
-    if len(blanks(board)) == 0:
-        return True
-    return False
-
-def setMove(board, x, y, player):
-    board[x][y] = player
-
-def playerMove(board):
-    e = True
-    moves = {1: [0, 0], 2: [0, 1], 3: [0, 2],
-             4: [1, 0], 5: [1, 1], 6: [1, 2],
-             7: [2, 0], 8: [2, 1], 9: [2, 2]}
-    while e:
-        try:
-            move = int(input('Enter a number between 1-9: '))
-            if move < 1 or move > 9:
-                print('Invalid Move! Try again!')
-            elif not (moves[move] in blanks(board)):
-                print('Invalid Move! Try again!')
-            else:
-                setMove(board, moves[move][0], moves[move][1], 1)
-                Gameboard(board)
-                e = False
-        except(KeyError, ValueError):
-            print('Enter a number!')
 
 def getScore(board):
-    if winningPlayer(board, 1):
+
+    if isPlayerWinning(board,1):
         return 10
-
-    elif winningPlayer(board, -1):
+    elif isPlayerWinning(board,-1):
         return -10
-
-    else:
+    else :
         return 0
 
-def abminimax(board, depth, alpha, beta, player):
-    row = -1
-    col = -1
-    if depth == 0 or gameWon(board):
-        return [row, col, getScore(board)]
 
-    else:
-        for cell in blanks(board):
-            setMove(board, cell[0], cell[1], player)
-            score = abminimax(board, depth - 1, alpha, beta, -player)
-            if player == 1:
-                # X is always the max player
-                if score[2] > alpha:
-                    alpha = score[2]
-                    row = cell[0]
-                    col = cell[1]
+def alphaBeta(board,depth,alpha,beta,isMaximizing):
 
-            else:
-                if score[2] < beta:
-                    beta = score[2]
-                    row = cell[0]
-                    col = cell[1]
+    if isPlayerWinning(board,1):
+        return (1,None)
+    elif isPlayerWinning(board,-1):
+        return (-1,None)
+    elif isBoardFull(board):
+        return (0,None)
+    
+    if isMaximizing:
+        best_score = -10000
+        best_move  = None
 
-            setMove(board, cell[0], cell[1], 0)
+        for blank in getBlanks(board):
+            board[blank] = 1 # 1 represent X. Our AI will be always X
+            score , _ = alphaBeta(board,depth-1,alpha,beta,False)
+            board[blank] = 0
 
-            if alpha >= beta:
-                break
+            if score > best_score:
+                best_score = score
+                best_move = blank
+                alpha =  max(alpha,best_score)
 
-        if player == 1:
-            return [row, col, alpha]
+                if beta <= alpha:
+                    break
 
+        if best_move == None:
+            return (best_score,-1)
         else:
-            return [row, col, beta]
+            return (best_score,best_move)
+    else :
+        best_score = 10000
+        best_move  = None
 
-def o_comp(board):
-    if len(blanks(board)) == 9:
-        x = choice([0, 1, 2])
-        y = choice([0, 1, 2])
-        setMove(board, x, y, -1)
-        Gameboard(board)
+        for blank in getBlanks(board):
+            board[blank] = -1 # -1 represent O.User will be always O
+            score , _ = alphaBeta(board,depth-1,alpha,beta,True)
+            board[blank] = 0
 
-    else:
-        result = abminimax(board, len(blanks(board)), -inf, inf, -1)
-        setMove(board, result[0], result[1], -1)
-        Gameboard(board)
+            if score <  best_score:
+                best_score = score
+                best_move = blank
+                beta =  min(beta,best_score)
 
-def x_comp(board):
-    if len(blanks(board)) == 9:
-        x = choice([0, 1, 2])
-        y = choice([0, 1, 2])
-        setMove(board, x, y, 1)
-        Gameboard(board)
+                if beta <= alpha:
+                    break
 
-    else:
-        result = abminimax(board, len(blanks(board)), -inf, inf, 1)
-        setMove(board, result[0], result[1], 1)
-        Gameboard(board)
-
-def makeMove(board, player, mode):
-    if mode == 1:
-        if player == 1:
-            playerMove(board)
-
+        if best_move == None:
+            return (best_score,-1)
         else:
-            o_comp(board)
-    else:
-        if player == 1:
-            o_comp(board)
-        else:
-            x_comp(board)
+            return (best_score,best_move)
 
-def pvc():
+
+def aiMove(board):
+    _ , best_move = alphaBeta(board,len(getBlanks(board)) , -1000,1000,True)
+
+    if best_move is not None:
+        board[best_move] = 1
+
+    return board
+
+def playerMove(board):
     while True:
-        try:
-            order = int(input('Enter to play 1st or 2nd: '))
-            if not (order == 1 or order == 2):
-                print('Please pick 1 or 2')
-            else:
-                break
-        except(KeyError, ValueError):
-            print('Enter a number')
+        p = (int(input("Enter a move from (1-9) : "))-1)
+       
+        if p in getBlanks(board):
+            board[p] = -1
+            break
+        else:
+            print("Try again !!")
 
-    Clearboard(board)
-    if order == 2:
-        currentPlayer = -1
-    else:
-        currentPlayer = 1
+    return board
 
-    while not (boardFull(board) or gameWon(board)):
-        makeMove(board, currentPlayer, 1)
-        currentPlayer *= -1
+def play():
+    board = [0]*9
+    print("=================================================")
+    print("TIC-TAC-TOE using MINIMAX with ALPHA-BETA Pruning")
+    print("=================================================")
 
-    printResult(board)
+    print("You are playing as 'O' and Computer is 'X'")
 
-# Driver Code
-print("=================================================")
-print("TIC-TAC-TOE using MINIMAX with ALPHA-BETA Pruning")
-print("=================================================")
-pvc()
+    while True:
+        
+        board = playerMove(board)
+
+        if isPlayerWinning(board,-1):
+            print("Congrats! You Won!")
+            break
+        elif isPlayerWinning(board,1):
+            print("Sorry! You Lost!")
+            break
+        elif isBoardFull(board):
+            print("OOps! It's a draw.")
+            break
+        board = aiMove(board)
+        GameBoard(board)
+        if isPlayerWinning(board,-1):
+            print("Congrats! You Won!")
+            break
+        elif isPlayerWinning(board,1):
+            print("Sorry! You Lost!")
+            break
+        elif isBoardFull(board):
+            print("OOps! It's a draw.")
+            break
+
+
+play()

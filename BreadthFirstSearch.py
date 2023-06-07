@@ -21,7 +21,7 @@ def bfs(node,G,visited,queue,tosearch):
     if(flag):
         print("\nElement found")
     else:
-        print("Seach unsuccessfull")
+        print("Search unsuccessfull")
     
 print("The path is:")
 bfs('A',G,visited,queue,tosearch)

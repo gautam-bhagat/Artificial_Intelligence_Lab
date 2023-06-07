@@ -17,14 +17,19 @@ def successors(state):
     if b == 1: 
         if is_valid((m, c-2, 0)):
             moves.append((m, c-2, 0))
+
         if is_valid((m-2, c, 0)):
             moves.append((m-2, c, 0))
+
         if is_valid((m-1, c-1, 0)):
             moves.append((m-1, c-1, 0))
+
         if is_valid((m, c-1, 0)):
             moves.append((m, c-1, 0))
+
         if is_valid((m-1, c, 0)):
             moves.append((m-1, c, 0))
+
     else: # boat is on the right side
         if is_valid((m, c+2, 1)):
             moves.append((m, c+2, 1))
@@ -36,6 +41,8 @@ def successors(state):
             moves.append((m, c+1, 1))
         if is_valid((m+1, c, 1)):
             moves.append((m+1, c, 1))
+
+    print("Successor : ",moves)
     return moves
 
 def heuristic(state):
@@ -49,6 +56,7 @@ def a_star(start_state):
     while heap:
         _, cost, path = heapq.heappop(heap)
         current_state = path[-1]
+        print("Current State : ",current_state)
         if current_state in visited:
             continue
         if current_state == (0, 0, 0):
@@ -62,7 +70,9 @@ def a_star(start_state):
     return None
 
 start_state = (3, 3, 1)
+
 solution = a_star(start_state)
+
 if solution:
     print(solution)
 else:

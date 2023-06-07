@@ -54,6 +54,7 @@ def checkBoard(r,c):
         checkBoard(r-1,int(b.get(r-1))+1)   # Here actual backtracking happens for previous row
 
 checkBoard(0,0)
+
 for i in a:
     print(i)
     
